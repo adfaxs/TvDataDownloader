@@ -1,37 +1,41 @@
-from credentials import get_cred
 from tvDatafeed import TvDatafeed,Interval
 import os
 import progressbar
 from time import sleep
 
-username,password=get_cred('tradingview')
-tv=TvDatafeed(username=username,password=password)
+tv=TvDatafeed(auto_login=False)
 
-path='C:\\Users\\suraj\\Desktop\\EOD DATA FROM TV'
+
+path='C:\\Users\\suraj\\Desktop\\Total EOD DATA FROM TV'
 if not os.path.exists(path):
     os.makedirs(path)
 
 f=open("stocklist.txt","r")
+
+#f=open("totalmarket.txt","r")
+#f=open("other.txt","r")
 ticker=f.readlines()
+
 
 num_lines=len(ticker)
 
 bar = progressbar.ProgressBar(maxval=num_lines,widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
 bar.start()
 for x in range(num_lines):
+    symboll=ticker[x].strip()
     try:
-        df = tv.get_hist(ticker[x].strip(),'NSE',interval=Interval.in_daily,n_bars=10500)
-        print('Downloading........'+ticker[x].strip())
-        df.to_csv(path +'\\%s.csv'%ticker[x].strip())
+        dff = tv.get_hist(symbol=symboll,exchange='NSE',interval=Interval.in_daily,n_bars=10000,extended_session=False)
+        print('Downloading........'+symboll)
+        dff.to_csv(path +'\\%s.csv'%symboll)
         bar.update(x)
     except:
         try:
-            df = tv.get_hist(ticker[x].strip(),'CURRENCYCOM',interval=Interval.in_daily,n_bars=10500)
-            print('Downloading........'+ticker[x].strip())
-            df.to_csv(path +'\\%s.csv'%ticker[x].strip())
+            dff = tv.get_hist(symboll,'CURRENCYCOM',interval=Interval.in_daily,n_bars=10000)
+            print('Downloading........'+symboll)
+            dff.to_csv(path +'\\%s.csv'%symboll)
             bar.update(x)
         except:
-            print("Not able to download @@@   "+ticker[x].strip()) 
+            print("Not able to download @@@   "+symboll) 
             continue
 
         continue
